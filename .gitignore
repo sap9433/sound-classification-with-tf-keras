@@ -5,3 +5,5 @@ __pycache__
 *.pyc
 *.hdf5
 nohup.out
+*.DS_Store
+.idea/workspace.xml

@@ -32,8 +32,6 @@ Mac OS X or Linux.
 * run `python eval_network.py`  - This applies the trained network to the testing dataset and gives you accuracy reports.
 
 
-
-## Data Preparation
 ### Data organization:
 Sound files should go into a directory called `Samples/` that is local off wherever the scripts are being run.  Within `Samples`, you should have subdirectories which divide up the various classes.
 
@@ -67,7 +65,8 @@ To do the preprocessing you just run
 
 ## Training & Evaluating the Network
 `$ python train_network.py`
-That's all you need.  (I should add command-line arguments to adjust the layer size and number of layers...later.)
+
+That's all you need. 
 
 It will perform an 80-20 split of training vs. testing data, and give you some validation scores along the way.  
 
