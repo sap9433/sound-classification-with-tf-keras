@@ -1,17 +1,4 @@
 #! /usr/bin/env python3
-
-'''
-Classify sounds using database - evaluation code.
-Generates a score based on contents of Preproc/Test/
-
-Author: Scott H. Hawley
-
-This is kind of a mixture of Keun Woo Choi's code https://github.com/keunwoochoi/music-auto_tagging-keras
-   and the MNIST classifier at https://github.com/fchollet/keras/blob/master/examples/mnist_cnn.py
-
-Trained using Fraunhofer IDMT's database of monophonic guitar effects,
-   clips were 2 seconds long, sampled at 44100 Hz
-'''
 from __future__ import print_function
 import numpy as np
 import matplotlib

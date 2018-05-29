@@ -3,7 +3,6 @@ Samples/*.mp3
 Preproc
 __pycache__
 *.pyc
-*.hdf5
 nohup.out
 *.DS_Store
 .idea/workspace.xml

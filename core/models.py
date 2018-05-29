@@ -34,7 +34,7 @@ def MyCNN_Keras2(X_shape, nb_classes, nb_layers=4):
     from keras import backend as K
     K.set_image_data_format('channels_last')                   # SHH changed on 3/1/2018 b/c tensorflow prefers channels_last
 
-    nb_filters = 32  # number of convolutional filters = "feature maps"
+    nb_filters = 8  # number of convolutional filters = "feature maps"
     kernel_size = (3, 3)  # convolution kernel size
     pool_size = (2, 2)  # size of pooling area for max pooling
     cl_dropout = 0.5    # conv. layer dropout
@@ -47,15 +47,15 @@ def MyCNN_Keras2(X_shape, nb_classes, nb_layers=4):
     model.add(BatchNormalization(axis=1))
     model.add(Activation('relu'))        # Leave this relu & BN here.  ELU is not good here (my experience)
 
-    for layer in range(nb_layers-1):   # add more layers than just the first
-        model.add(Conv2D(nb_filters, kernel_size))
-        #model.add(BatchNormalization(axis=1))  # ELU authors reccommend no BatchNorm. I confirm.
-        model.add(Activation('elu'))
-        model.add(MaxPooling2D(pool_size=pool_size))
-        model.add(Dropout(cl_dropout))
+    # for layer in range(nb_layers-1):   # add more layers than just the first
+    #     model.add(Conv2D(nb_filters, kernel_size))
+    #     #model.add(BatchNormalization(axis=1))  # ELU authors reccommend no BatchNorm. I confirm.
+    #     model.add(Activation('elu'))
+    #     model.add(MaxPooling2D(pool_size=pool_size))
+    #     model.add(Dropout(cl_dropout))
 
     model.add(Flatten())
-    model.add(Dense(128))            # 128 is 'arbitrary' for now
+    model.add(Dense(32))            # 128 is 'arbitrary' for now
     #model.add(Activation('relu'))   # relu (no BN) works ok here, however ELU works a bit better...
     model.add(Activation('elu'))
     model.add(Dropout(dl_dropout))
@@ -229,7 +229,7 @@ def setup_model(X, class_names, nb_layers=4, try_checkpoint=True,
                 print('No weights file detected, so starting from scratch.')
 
 
-    opt = 'adadelta' # Adam(lr = 0.00001)  # So far, adadelta seems to work the best of things I've tried
+    opt = Adam(lr = 0.01) #'adadelta' #   # So far, adadelta seems to work the best of things I've tried
     metrics = ['accuracy']
 
     if (multi_tag):     # multi_tag means more than one class can be 'chosen' at a time; default is 'only one' 
