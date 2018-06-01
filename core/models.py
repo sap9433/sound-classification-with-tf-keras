@@ -26,7 +26,7 @@ import h5py
 
 # This is a VGG-style network that I made by 'dumbing down' @keunwoochoi's compact_cnn code
 # I have not attempted much optimization, however it *is* fairly understandable
-def MyCNN_Keras2(X_shape, nb_classes, nb_layers=4):
+def MyCNN_Keras2_old1(X_shape, nb_classes, nb_layers=4):
     # Inputs:
     #    X_shape = [ # spectrograms per batch, # audio channels, # spectrogram freq bins, # spectrogram time bins ]
     #    nb_classes = number of output n_classes
@@ -34,7 +34,7 @@ def MyCNN_Keras2(X_shape, nb_classes, nb_layers=4):
     from keras import backend as K
     K.set_image_data_format('channels_last')                   # SHH changed on 3/1/2018 b/c tensorflow prefers channels_last
 
-    nb_filters = 8  # number of convolutional filters = "feature maps"
+    nb_filters = 32  # number of convolutional filters = "feature maps"
     kernel_size = (3, 3)  # convolution kernel size
     pool_size = (2, 2)  # size of pooling area for max pooling
     cl_dropout = 0.5    # conv. layer dropout
@@ -47,20 +47,82 @@ def MyCNN_Keras2(X_shape, nb_classes, nb_layers=4):
     model.add(BatchNormalization(axis=1))
     model.add(Activation('relu'))        # Leave this relu & BN here.  ELU is not good here (my experience)
 
-    # for layer in range(nb_layers-1):   # add more layers than just the first
-    #     model.add(Conv2D(nb_filters, kernel_size))
-    #     #model.add(BatchNormalization(axis=1))  # ELU authors reccommend no BatchNorm. I confirm.
-    #     model.add(Activation('elu'))
-    #     model.add(MaxPooling2D(pool_size=pool_size))
-    #     model.add(Dropout(cl_dropout))
+    for layer in range(nb_layers-1):   # add more layers than just the first
+        model.add(Conv2D(nb_filters, kernel_size))
+        #model.add(BatchNormalization(axis=1))  # ELU authors reccommend no BatchNorm. I confirm.
+        model.add(Activation('elu'))
+        model.add(MaxPooling2D(pool_size=pool_size))
+        model.add(Dropout(cl_dropout))
 
     model.add(Flatten())
-    model.add(Dense(32))            # 128 is 'arbitrary' for now
+    model.add(Dense(128))            # 128 is 'arbitrary' for now
     #model.add(Activation('relu'))   # relu (no BN) works ok here, however ELU works a bit better...
     model.add(Activation('elu'))
     model.add(Dropout(dl_dropout))
     model.add(Dense(nb_classes))
     model.add(Activation("softmax"))
+    return model
+
+def MyCNN_Keras2(X_shape, nb_classes, nb_layers=4):
+    # Inputs:
+    #    X_shape = [ # spectrograms per batch, # audio channels, # spectrogram freq bins, # spectrogram time bins ]
+    #    nb_classes = number of output n_classes
+    #    nb_layers = number of conv-pooling sets in the CNN
+    from keras import backend as K
+    K.set_image_data_format('channels_last')                   # SHH changed on 3/1/2018 b/c tensorflow prefers channels_last
+
+    nb_filters = 16  # number of convolutional filters = "feature maps"
+    kernel_size = (3, 3)  # convolution kernel size
+    pool_size = (2, 2)  # size of pooling area for max pooling
+    cl_dropout = 0.1    # conv. layer dropout
+    dl_dropout = 0.2    # dense layer dropout
+
+    print(" MyCNN_Keras2: X_shape = ",X_shape,", channels = ",X_shape[3])
+    input_shape = (X_shape[1], X_shape[2], X_shape[3])
+    model = Sequential()
+    model.add(Conv2D(nb_filters, kernel_size, padding='valid', input_shape=input_shape))
+    model.add(BatchNormalization(axis=1))
+    model.add(Activation('relu'))        # Leave this relu & BN here.  ELU is not good here (my experience)
+
+    for layer in range(nb_layers-1):   # add more layers than just the first
+        model.add(Conv2D(nb_filters, kernel_size))
+        #model.add(BatchNormalization(axis=1))  # ELU authors reccommend no BatchNorm. I confirm.
+        model.add(Activation('elu'))
+        model.add(MaxPooling2D(pool_size=pool_size))
+        model.add(Dropout(cl_dropout))
+
+    model.add(Flatten())
+    model.add(Dense(128))            # 128 is 'arbitrary' for now
+    #model.add(Activation('relu'))   # relu (no BN) works ok here, however ELU works a bit better...
+    model.add(Activation('elu'))
+    model.add(Dropout(dl_dropout))
+    model.add(Dense(nb_classes))
+    model.add(Activation("softmax"))
+    return model
+
+def MyCNN_Keras2_allCry(X_shape, nb_classes, nb_layers=4):
+    # Inputs:
+    #    X_shape = [ # spectrograms per batch, # audio channels, # spectrogram freq bins, # spectrogram time bins ]
+    #    nb_classes = number of output n_classes
+    #    nb_layers = number of conv-pooling sets in the CNN
+    from keras import backend as K
+    K.set_image_data_format('channels_last')                   # SHH changed on 3/1/2018 b/c tensorflow prefers channels_last
+    print(" MyCNN_Keras2: X_shape = ",X_shape,", channels = ",X_shape[3])
+    input_shape = (X_shape[1], X_shape[2], X_shape[3])
+    model = Sequential()
+
+
+    model.add(Dense(32, input_shape=input_shape))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+
+    model.add(Dense(32))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+    model.add(Flatten())
+    model.add(Dense(nb_classes))
+    model.add(Activation('softmax'))
+
     return model
 
 
@@ -228,8 +290,9 @@ def setup_model(X, class_names, nb_layers=4, try_checkpoint=True,
             else:
                 print('No weights file detected, so starting from scratch.')
 
-
-    opt = Adam(lr = 0.01) #'adadelta' #   # So far, adadelta seems to work the best of things I've tried
+    ##Reduce lr to 0.01, 0.001 if you have higher computing power.
+    opt = keras.optimizers.Nadam(lr=0.1, beta_1=0.9, beta_2=0.999, epsilon=None, schedule_decay=0.04)
+    #opt = Adam(lr = 0.1) #'adadelta' #   # So far, adadelta seems to work the best of things I've tried
     metrics = ['accuracy']
 
     if (multi_tag):     # multi_tag means more than one class can be 'chosen' at a time; default is 'only one' 

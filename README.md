@@ -19,7 +19,7 @@ Mac OS X or Linux.
 ### Installation:
 `git clone https://github.com/sap9433/panotti.git`
 
-`cd panotti`
+`cd sound-classification-with-tf-keras`
 
 `pip install -r requirements.txt`
 
